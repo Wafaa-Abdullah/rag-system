@@ -347,9 +347,3 @@ test_api()
 ## 👤 Author
 
 [Wafaa Fraih] 
-
-
-
-4. Contact author
-
-**Built with ❤️ for the NLP Engineer Technical Challenge**

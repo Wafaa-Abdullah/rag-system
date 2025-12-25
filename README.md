@@ -1,4 +1,3 @@
-# rag-system
 # RAG TriviaQA System
 
 A production-grade Retrieval Augmented Generation (RAG) system with **Gradio interface** for answering trivia questions using document embeddings, vector retrieval, and language models.

@@ -1,56 +1,53 @@
-# RAG TriviaQA System
+RAG TriviaQA System
 
-This project implements a **Retrieval-Augmented Generation (RAG)** system using **vector embeddings** and **LLM integration**, allowing you to ask questions and get accurate answers with context retrieval.
+This project implements a Retrieval-Augmented Generation (RAG) system combining vector embeddings with LLM integration. Users can ask questions and get accurate answers along with the relevant context. The system supports both local LLMs (Ollama/FLAN-T5) and FastAPI deployment with Docker or Colab + ngrok demo.
 
----
+Features
 
-## Features
+Text preprocessing and chunking (300–800 tokens per chunk)
 
-- Text preprocessing and chunking (300-800 tokens per chunk)
-- Document embeddings using **SentenceTransformers**
-- Vector search using **FAISS**
-- LLM answer generation (**Ollama** / **FLAN-T5**)
-- FastAPI REST API with `/query` endpoint
-- Evaluation support (accuracy, latency, retrieved context)
-- Dockerized for easy deployment
-- Colab + ngrok support for public demo
-- Optional features: query reranking, cleaner logging, custom chunking
+Document embeddings using SentenceTransformers
 
----
+Vector-based document retrieval via FAISS
 
-## 🗂️ Project Structure
+Answer generation with Ollama or HuggingFace FLAN-T5
+
+FastAPI REST API exposing /query endpoint
+
+Evaluation of system performance (accuracy, latency, retrieved context)
+
+Dockerized for easy deployment
+
+Colab + ngrok support for public demo
+
+Optional: query reranking, custom logging, architecture tuning
+
+🗂️ Project Structure
 RAG-TriviaQA/
-├── api.py # FastAPI application
-├── config.py # Configuration parameters
-├── document_processor.py # Preprocessing & chunking
-├── retriever.py # Vector retrieval
-├── llm_handler.py # LLM integration (Ollama / HuggingFace)
-├── rag_pipeline.py # Main RAG pipeline
-├── evaluation.py # Evaluation script & table generation
-├── requirements.txt
-├── Dockerfile
-└── README.md
+├── api.py                 # FastAPI application
+├── config.py              # Configuration parameters
+├── document_processor.py  # Text preprocessing & chunking
+├── retriever.py           # Vector retrieval
+├── llm_handler.py         # LLM integration
+├── rag_pipeline.py        # RAG query pipeline
+├── evaluation.py          # Evaluation scripts & summary table
+├── requirements.txt       # Python dependencies
+├── Dockerfile             # Containerization
+└── README.md              # This file
 
-
----
-
-## Installation
-
-### Clone the repo
-
-```bash
+Installation
+Clone repository
 git clone https://github.com/<username>/RAG-TriviaQA.git
 cd RAG-TriviaQA
 
-### Install dependencies
-
+Install dependencies
 pip install -r requirements.txt
 
-Running API locally
-
+Running FastAPI Locally
 uvicorn api:app --host 0.0.0.0 --port 8000
 
-Example request:
+
+Example POST request:
 
 POST /query
 {
@@ -59,7 +56,7 @@ POST /query
 }
 
 
-Example response:
+Example Response:
 
 {
   "question": "What is the capital of France?",
@@ -72,8 +69,9 @@ Example response:
   "latency_ms": 2800
 }
 
-Running on Colab with ngrok (public URL)
+Running on Colab with ngrok
 !pip install pyngrok
+
 from pyngrok import ngrok
 
 # Add your ngrok auth token
@@ -86,23 +84,22 @@ print("Public URL:", public_url)
 # Run FastAPI
 !uvicorn api:app --host 0.0.0.0 --port 8000
 
+
+This allows external access to your FastAPI service via a public URL.
+
+Ideal for quick demos and sharing with collaborators.
+
 Evaluation
 
-Use evaluation.py to test multiple questions
+Use evaluation.py to test multiple questions:
 
 Measures:
 
 Context retrieval accuracy
 
-Answer correctness (Correct / Partially Correct / Incorrect)
+Answer correctness: Correct / Partially Correct / Incorrect
 
 Response latency
-
-Outputs:
-
-DataFrame with all results
-
-Summary text for quick report
 
 Example usage:
 
@@ -126,7 +123,7 @@ docker build -t rag-triviaqa .
 docker run -p 8000:8000 rag-triviaqa
 
 
-Access Swagger UI: http://localhost:8000/docs
+Access Swagger UI at: http://localhost:8000/docs
 
 Configuration
 
@@ -134,15 +131,32 @@ Modify config.py for:
 
 Dataset size
 
-Chunk size / overlap
+Chunk size & overlap
 
-LLM backend (Ollama / HuggingFace)
+LLM backend: Ollama / HuggingFace
 
 Embedding model
 
 Retrieval top_k
 
-Generation parameters (temperature, max_length)
+Generation parameters: temperature, max_length
 
+Colab Notebook (Gradio Demo)
 
+A Colab notebook is provided to quickly test the RAG system with a Gradio interface:
 
+Interactively ask questions
+
+View retrieved contexts and generated answers
+
+Monitor latency and query history
+
+Steps:
+
+Open the notebook: [https://colab.research.google.com/drive/1GCFALUcsXouv992LZZp8PkDNl4DMDR3i?usp=sharing]
+
+Run all cells to initialize the system (dataset, embeddings, FAISS, LLM, RAG pipeline)
+
+Use Gradio UI to input questions
+
+Optional: Adjust top_k for context retrieval

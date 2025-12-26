@@ -20,22 +20,6 @@ A **Retrieval-Augmented Generation (RAG)** system for question answering using *
 
 ---
 
-## 📂 Project Structure
-RAG-TriviaQA/
-├── main.py # FastAPI entrypoint
-├── config.py # Configuration parameters
-├── document_processor.py # Data preprocessing & chunking
-├── retriever.py # Vector retrieval logic
-├── llm_handler.py # LLM integration (Ollama / HuggingFace)
-├── rag_pipeline.py # Orchestration of RAG queries
-├── evaluation.py # Evaluation script & result table generation
-├── requirements.txt # Python dependencies
-├── Dockerfile # Docker container setup
-├── docker-compose.yml # Optional Docker Compose
-└── README.md # Project documentation
-
-
-
 ## Architecture
 User Query → Embedding → FAISS Search → Top-K Contexts → LLM → Answer
 
@@ -43,50 +27,66 @@ User Query → Embedding → FAISS Search → Top-K Contexts → LLM → Answer
 ---
 
 ## Quick Start
+colab notebook link: [https://colab.research.google.com/drive/1GCFALUcsXouv992LZZp8PkDNl4DMDR3i?usp=sharing]
 
-### Option 1: Docker (Recommended)
+### Option 1: Docker 
 ```bash
-# Build and run the container
+# Build and run
 docker-compose up --build
 
 # API available at: http://localhost:8000
+```
 
+### Option 2: Local Setup
+```bash
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Install Ollama (for local LLM inference)
+# 2. Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
 ollama serve &
 ollama pull qwen2.5:0.5b
 
-# 3. Run FastAPI locally
+# 3. Run API
 uvicorn main:app --reload
 
-# 4. Run evaluation script
-python evaluation.py
+# 4. Run evaluation
+python evaluate.py
+```
 
+## API Usage
+
+### Query Endpoint
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is the capital of France?",
+    "top_k": 3
+  }'
+```
+
+### Response
+```json
 {
   "question": "What is the capital of France?",
-  "top_k": 3
+  "answer": "Paris",
+  "retrieved_context": ["...", "...", "..."],
+  "latency_ms": 234
 }
+```
 
-## Docker Usage
-# Build the Docker image
-docker build -t rag-triviaqa .
+## Configuration
 
-# Run container locally
-docker run -p 8000:8000 rag-triviaqa
+Edit `.env` file:
+```env
+DATASET_SIZE=1000
+CHUNK_SIZE=400
+TOP_K_RETRIEVAL=3
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+OLLAMA_MODEL=qwen2.5:0.5b
+```
 
-# Access Swagger UI at: http://localhost:8000/docs
+## API Documentation
 
-## Colab Demo with Gradio + FastAPI + ngrok
-
-You can run the RAG system directly in Google Colab with a public URL using **ngrok**. This allows you to interact with both a **FastAPI backend** and a **Gradio interface**.
-
----
-
-### Install Dependencies
-
-```python
-!pip install -q fastapi uvicorn pyngrok gradio sentence-transformers faiss-cpu
-notebook link: [https://colab.research.google.com/drive/1GCFALUcsXouv992LZZp8PkDNl4DMDR3i?usp=sharing]
+Interactive docs: http://localhost:8000/docs

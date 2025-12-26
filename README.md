@@ -1,6 +1,6 @@
 # RAG TriviaQA System
 
-A **Retrieval-Augmented Generation (RAG)** system for question answering using **vector embeddings** and **LLM integration**. This project enables users to query a dataset (TriviaQA) and receive accurate answers along with the most relevant context.
+A Retrieval-Augmented Generation (RAG) system that combines vector embeddings with LLM integration to answer TriviaQA questions. The system retrieves relevant context and generates accurate answers in real-time. Supports both FastAPI REST API and Gradio demo interface.
 
 ---
 

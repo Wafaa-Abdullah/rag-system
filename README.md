@@ -1,348 +1,148 @@
 # RAG TriviaQA System
 
-A production-grade Retrieval Augmented Generation (RAG) system with **Gradio interface** for answering trivia questions using document embeddings, vector retrieval, and language models.
-
-
-## 🏗️ System Architecture
-
-```
-User Question
-     ↓
-[Gradio Interface / API]
-     ↓
-[Query Embedding] ← SentenceTransformers (all-MiniLM-L6-v2)
-     ↓
-[FAISS Vector Search] → Retrieve Top-K Chunks
-     ↓
-[Context + Question]
-     ↓
-[LLM Generation] ← Ollama Qwen2.5:0.5b / FLAN-T5
-     ↓
-[Response] → {answer, context, latency}
-     ↓
-[Web UI + API Endpoint]
-```
+This project implements a **Retrieval-Augmented Generation (RAG)** system using **vector embeddings** and **LLM integration**, allowing you to ask questions and get accurate answers with context retrieval.
 
 ---
 
-## 🚀 Quick Start
+## Features
 
-### Prerequisites
+- Text preprocessing and chunking (300-800 tokens per chunk)
+- Document embeddings using **SentenceTransformers**
+- Vector search using **FAISS**
+- LLM answer generation (**Ollama** / **FLAN-T5**)
+- FastAPI REST API with `/query` endpoint
+- Evaluation support (accuracy, latency, retrieved context)
+- Dockerized for easy deployment
+- Colab + ngrok support for public demo
+- Optional features: query reranking, cleaner logging, custom chunking
 
-- Python 3.8+
-- 4GB RAM minimum
-- 2GB free disk space
+---
 
-### Installation & Setup
+## 🗂️ Project Structure
+RAG-TriviaQA/
+├── api.py # FastAPI application
+├── config.py # Configuration parameters
+├── document_processor.py # Preprocessing & chunking
+├── retriever.py # Vector retrieval
+├── llm_handler.py # LLM integration (Ollama / HuggingFace)
+├── rag_pipeline.py # Main RAG pipeline
+├── evaluation.py # Evaluation script & table generation
+├── requirements.txt
+├── Dockerfile
+└── README.md
 
-#### Option 1: Google Colab (Recommended - No Local Setup)
 
-1. Open https://colab.research.google.com
-2. Upload the notebook or copy code
-3. Run all cells
-4. Get instant public URL
+---
 
-**Time: ~30 minutes**
+## Installation
 
-#### Option 2: Local Setup
+### Clone the repo
 
 ```bash
-# Clone repository
-git clone <repo-url>
-cd rag-trivia-system
+git clone https://github.com/<username>/RAG-TriviaQA.git
+cd RAG-TriviaQA
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+### Install dependencies
 
-# Install dependencies
 pip install -r requirements.txt
 
-# Process dataset (first time only)
-python process_data.py
+Running API locally
 
-# Run the system
-python app.py
-```
+uvicorn api:app --host 0.0.0.0 --port 8000
 
-**Access:**
-- Web UI: http://localhost:7860
-- API: http://localhost:7860/api/predict
-- Docs: http://localhost:7860/docs
+Example request:
 
----
-
-## 🔌 API Usage
-
-### Web Interface
-
-Simply open the Gradio URL and interact with the interface.
-
-### Programmatic Access
-
-The system automatically exposes an API endpoint:
-
-**Endpoint:** `/api/predict`  
-**Method:** POST  
-**Content-Type:** application/json
-
-**Request Format:**
-```json
+POST /query
 {
-  "data": [
-    "What is the capital of France?",  // question
-    3                                   // top_k
-  ]
+  "question": "What is the capital of France?",
+  "top_k": 3
 }
-```
 
-**Response Format:**
-```json
+
+Example response:
+
 {
-  "data": [
-    "Answer: Paris\nLatency: 245ms\nRetrieved: 3 contexts",  // formatted answer
-    "Context 1: ...\nContext 2: ...\nContext 3: ...",        // contexts
-    "Total Queries: 10\nSuccessful: 10\n...",                // stats
-    "Recent Queries:\n1. Question..."                         // history
-  ]
+  "question": "What is the capital of France?",
+  "answer": "The capital of France is Paris.",
+  "contexts": [
+    "Question: What is the capital of France? Answer: Paris",
+    "Question: France is in which continent? Answer: Europe"
+  ],
+  "scores": [0.80, 0.65],
+  "latency_ms": 2800
 }
-```
 
-**Example Usage:**
+Running on Colab with ngrok (public URL)
+!pip install pyngrok
+from pyngrok import ngrok
 
-```python
-import requests
+# Add your ngrok auth token
+!ngrok authtoken <YOUR_NGROK_AUTH_TOKEN>
 
-# Query the system
-response = requests.post(
-    "http://localhost:7860/api/predict",
-    json={"data": ["What is the capital of France?", 3]}
-)
+# Open tunnel for FastAPI
+public_url = ngrok.connect(8000)
+print("Public URL:", public_url)
 
-result = response.json()
-print(result)
-```
+# Run FastAPI
+!uvicorn api:app --host 0.0.0.0 --port 8000
 
-```bash
-# cURL example
-curl -X POST "http://localhost:7860/api/predict" \
-  -H "Content-Type: application/json" \
-  -d '{"data": ["What is the capital of France?", 3]}'
-```
+Evaluation
 
----
+Use evaluation.py to test multiple questions
 
-## 📊 Features
+Measures:
 
-### Core RAG Pipeline
-- ✅ Document chunking with overlap
-- ✅ Vector embeddings (384-dimensional)
-- ✅ FAISS similarity search
-- ✅ LLM answer generation
-- ✅ Context relevance scoring
+Context retrieval accuracy
 
-### Web Interface
-- 🎨 Beautiful, responsive UI
-- 📊 Real-time statistics
-- 📜 Query history tracking
-- 💡 Example questions
-- ⚡ Latency monitoring
-- 🔄 Clear history function
+Answer correctness (Correct / Partially Correct / Incorrect)
 
-### API Capabilities
-- 🔌 RESTful endpoint
-- 📋 JSON request/response
-- ❌ Error handling
-- ⏱️ Performance tracking
-- 📚 Auto-generated documentation
+Response latency
 
----
+Outputs:
 
-## 📈 Evaluation Results
+DataFrame with all results
 
-### Test Dataset: 15 TriviaQA Questions
+Summary text for quick report
 
-| Metric | Result |
-|--------|--------|
-| **Total Questions** | 15 |
-| **Success Rate** | 100% (15/15) |
-| **Average Latency** | 280ms |
-| **Min Latency** | 198ms |
-| **Max Latency** | 412ms |
-| **Context Relevance** | 87% (contexts contained correct answer) |
+Example usage:
 
-### Answer Quality
+from evaluation import Evaluator
+from rag_pipeline import rag_pipeline
 
-- **Correct:** 70% (11/15)
-- **Partially Correct:** 20% (3/15)
-- **Incorrect:** 10% (1/15)
+evaluator = Evaluator(rag_pipeline)
 
-*See `evaluation_results.csv` for detailed breakdown*
+sample_questions = [
+    {"question": "What is the capital of France?", "answer": "Paris"},
+    {"question": "Who wrote Romeo and Juliet?", "answer": "William Shakespeare"}
+]
 
----
+evaluator.evaluate_questions(sample_questions)
+df = evaluator.get_results_df()
+print(df)
+print(evaluator.summary())
 
-## 🔧 Configuration
+Docker Usage
+docker build -t rag-triviaqa .
+docker run -p 8000:8000 rag-triviaqa
 
-Edit settings in `.env` or directly in code:
 
-```python
-# Dataset
-DATASET_SIZE = 1000              # Number of documents
-CHUNK_SIZE = 400                 # Tokens per chunk
-CHUNK_OVERLAP = 50              # Overlap between chunks
+Access Swagger UI: http://localhost:8000/docs
 
-# Retrieval
-TOP_K_RETRIEVAL = 3             # Default contexts to retrieve
+Configuration
 
-# Models
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_BACKEND = "ollama"          # or "huggingface"
-OLLAMA_MODEL = "qwen2.5:0.5b"
-HF_MODEL = "google/flan-t5-small"
+Modify config.py for:
 
-# Generation
-MAX_LENGTH = 512
-TEMPERATURE = 0.7
-```
+Dataset size
 
----
+Chunk size / overlap
 
-## 🎯 Design Decisions
+LLM backend (Ollama / HuggingFace)
 
-### 1. Gradio vs FastAPI
+Embedding model
 
-**Choice:** Gradio with API mode
+Retrieval top_k
 
-**Rationale:**
-- Provides both UI and API
-- Faster development (10x less code)
-- Better demo experience
-- Automatic documentation
-- Public URL with one parameter
-- Easier for video demonstration
-
-### 2. Embedding Model
-
-**Choice:** `all-MiniLM-L6-v2`
-
-**Rationale:**
-- Fast inference (~50ms per query)
-- Small size (~80MB)
-- Good semantic understanding
-- 384-dimensional vectors (efficient)
-- No API costs
-
-### 3. Vector Store
-
-**Choice:** FAISS with IndexFlatL2
-
-**Rationale:**
-- Exact nearest neighbor search
-- No approximation errors
-- Fast for <100K vectors
-- Easy to persist and load
-- No external dependencies
-
-### 4. LLM Selection
-
-**Choice:** Ollama Qwen2.5:0.5b (primary) / FLAN-T5-Small (fallback)
-
-**Rationale:**
-- Runs completely locally
-- No API keys required
-- Zero costs
-- Good quality for size
-- Fast inference on CPU
-- Easy to swap models
-
-### 5. Chunking Strategy
-
-**Parameters:** 400 tokens, 50 overlap
-
-**Rationale:**
-- Preserves context across chunks
-- Optimal for retrieval precision
-- Not too large for LLM context
-- Reduces chunk boundary issues
-
----
-
-## 🐳 Docker Deployment
-
-### Build Image
-
-```bash
-docker build -t rag-system .
-```
-
-### Run Container
-
-```bash
-docker run -p 7860:7860 rag-system
-```
-
-### Access
-- UI: http://localhost:7860
-- API: http://localhost:7860/api/predict
-
----
-
-## 📁 Project Structure
-
-```
-rag-trivia-system/
-├── app.py                  # Main Gradio application
-├── process_data.py         # Dataset processing
-├── rag_pipeline.py         # RAG components
-├── requirements.txt        # Dependencies
-├── Dockerfile             # Container config
-├── docker-compose.yml     # Docker compose
-├── .env                   # Configuration
-├── README.md              # This file
-├── data/
-│   ├── chunks.json       # Processed chunks
-│   └── faiss_index       # Vector index
-└── evaluation_results.csv # Evaluation data
-```
-
----
-
-## 🧪 Testing
-
-### Interactive Testing
-1. Open Gradio interface
-2. Use example questions
-3. Test with custom queries
-4. Check statistics
-
-### API Testing
-
-```python
-import requests
-
-def test_api():
-    url = "http://localhost:7860/api/predict"
-    
-    # Test cases
-    tests = [
-        ["What is the capital of France?", 3],
-        ["Who wrote Romeo and Juliet?", 3],
-        ["", 3],  # Empty query (should handle error)
-    ]
-    
-    for question, top_k in tests:
-        response = requests.post(
-            url,
-            json={"data": [question, top_k]}
-        )
-        print(f"Status: {response.status_code}")
-        print(f"Response: {response.json()}\n")
-
-test_api()
-```
+Generation parameters (temperature, max_length)
 
 
 
-## 👤 Author
-
-[Wafaa Fraih] 

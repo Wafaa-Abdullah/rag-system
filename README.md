@@ -1,162 +1,92 @@
-RAG TriviaQA System
+# RAG TriviaQA System
 
-This project implements a Retrieval-Augmented Generation (RAG) system combining vector embeddings with LLM integration. Users can ask questions and get accurate answers along with the relevant context. The system supports both local LLMs (Ollama/FLAN-T5) and FastAPI deployment with Docker or Colab + ngrok demo.
+A **Retrieval-Augmented Generation (RAG)** system for question answering using **vector embeddings** and **LLM integration**. This project enables users to query a dataset (TriviaQA) and receive accurate answers along with the most relevant context.
 
-Features
+---
 
-Text preprocessing and chunking (300–800 tokens per chunk)
+## Features
 
-Document embeddings using SentenceTransformers
+- Text preprocessing and chunking (300–800 tokens per chunk)  
+- Document embeddings using **SentenceTransformers**  
+- Vector search with **FAISS**  
+- Answer generation via **Ollama** or **FLAN-T5**  
+- FastAPI REST API with `/query` endpoint  
+- Evaluation support for:
+  - Context retrieval accuracy  
+  - Answer correctness (Correct / Partially Correct / Incorrect)  
+  - Response latency  
+- Dockerized for seamless deployment  
+- Optional Colab + ngrok support for public demo 
 
-Vector-based document retrieval via FAISS
+---
 
-Answer generation with Ollama or HuggingFace FLAN-T5
-
-FastAPI REST API exposing /query endpoint
-
-Evaluation of system performance (accuracy, latency, retrieved context)
-
-Dockerized for easy deployment
-
-Colab + ngrok support for public demo
-
-Optional: query reranking, custom logging, architecture tuning
-
-🗂️ Project Structure
+## 📂 Project Structure
 RAG-TriviaQA/
-├── api.py                 # FastAPI application
-├── config.py              # Configuration parameters
-├── document_processor.py  # Text preprocessing & chunking
-├── retriever.py           # Vector retrieval
-├── llm_handler.py         # LLM integration
-├── rag_pipeline.py        # RAG query pipeline
-├── evaluation.py          # Evaluation scripts & summary table
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Containerization
-└── README.md              # This file
+├── main.py # FastAPI entrypoint
+├── config.py # Configuration parameters
+├── document_processor.py # Data preprocessing & chunking
+├── retriever.py # Vector retrieval logic
+├── llm_handler.py # LLM integration (Ollama / HuggingFace)
+├── rag_pipeline.py # Orchestration of RAG queries
+├── evaluation.py # Evaluation script & result table generation
+├── requirements.txt # Python dependencies
+├── Dockerfile # Docker container setup
+├── docker-compose.yml # Optional Docker Compose
+└── README.md # Project documentation
 
-Installation
-Clone repository
-git clone https://github.com/<username>/RAG-TriviaQA.git
-cd RAG-TriviaQA
 
-Install dependencies
+
+## Architecture
+User Query → Embedding → FAISS Search → Top-K Contexts → LLM → Answer
+
+
+---
+
+## Quick Start
+
+### Option 1: Docker (Recommended)
+```bash
+# Build and run the container
+docker-compose up --build
+
+# API available at: http://localhost:8000
+
+# 1. Install dependencies
 pip install -r requirements.txt
 
-Running FastAPI Locally
-uvicorn api:app --host 0.0.0.0 --port 8000
+# 2. Install Ollama (for local LLM inference)
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &
+ollama pull qwen2.5:0.5b
 
+# 3. Run FastAPI locally
+uvicorn main:app --reload
 
-Example POST request:
+# 4. Run evaluation script
+python evaluation.py
 
-POST /query
 {
   "question": "What is the capital of France?",
   "top_k": 3
 }
 
-
-Example Response:
-
-{
-  "question": "What is the capital of France?",
-  "answer": "The capital of France is Paris.",
-  "contexts": [
-    "Question: What is the capital of France? Answer: Paris",
-    "Question: France is in which continent? Answer: Europe"
-  ],
-  "scores": [0.80, 0.65],
-  "latency_ms": 2800
-}
-
-Running on Colab with ngrok
-!pip install pyngrok
-
-from pyngrok import ngrok
-
-# Add your ngrok auth token
-!ngrok authtoken <YOUR_NGROK_AUTH_TOKEN>
-
-# Open tunnel for FastAPI
-public_url = ngrok.connect(8000)
-print("Public URL:", public_url)
-
-# Run FastAPI
-!uvicorn api:app --host 0.0.0.0 --port 8000
-
-
-This allows external access to your FastAPI service via a public URL.
-
-Ideal for quick demos and sharing with collaborators.
-
-Evaluation
-
-Use evaluation.py to test multiple questions:
-
-Measures:
-
-Context retrieval accuracy
-
-Answer correctness: Correct / Partially Correct / Incorrect
-
-Response latency
-
-Example usage:
-
-from evaluation import Evaluator
-from rag_pipeline import rag_pipeline
-
-evaluator = Evaluator(rag_pipeline)
-
-sample_questions = [
-    {"question": "What is the capital of France?", "answer": "Paris"},
-    {"question": "Who wrote Romeo and Juliet?", "answer": "William Shakespeare"}
-]
-
-evaluator.evaluate_questions(sample_questions)
-df = evaluator.get_results_df()
-print(df)
-print(evaluator.summary())
-
-Docker Usage
+## Docker Usage
+# Build the Docker image
 docker build -t rag-triviaqa .
+
+# Run container locally
 docker run -p 8000:8000 rag-triviaqa
 
+# Access Swagger UI at: http://localhost:8000/docs
 
-Access Swagger UI at: http://localhost:8000/docs
+## Colab Demo with Gradio + FastAPI + ngrok
 
-Configuration
+You can run the RAG system directly in Google Colab with a public URL using **ngrok**. This allows you to interact with both a **FastAPI backend** and a **Gradio interface**.
 
-Modify config.py for:
+---
 
-Dataset size
+### Install Dependencies
 
-Chunk size & overlap
-
-LLM backend: Ollama / HuggingFace
-
-Embedding model
-
-Retrieval top_k
-
-Generation parameters: temperature, max_length
-
-Colab Notebook (Gradio Demo)
-
-A Colab notebook is provided to quickly test the RAG system with a Gradio interface:
-
-Interactively ask questions
-
-View retrieved contexts and generated answers
-
-Monitor latency and query history
-
-Steps:
-
-Open the notebook: [https://colab.research.google.com/drive/1GCFALUcsXouv992LZZp8PkDNl4DMDR3i?usp=sharing]
-
-Run all cells to initialize the system (dataset, embeddings, FAISS, LLM, RAG pipeline)
-
-Use Gradio UI to input questions
-
-Optional: Adjust top_k for context retrieval
+```python
+!pip install -q fastapi uvicorn pyngrok gradio sentence-transformers faiss-cpu
+notebook link: [https://colab.research.google.com/drive/1GCFALUcsXouv992LZZp8PkDNl4DMDR3i?usp=sharing]

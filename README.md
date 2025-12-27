@@ -87,6 +87,3 @@ EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 OLLAMA_MODEL=qwen2.5:0.5b
 ```
 
-## API Documentation
-
-Interactive docs: http://localhost:8000/docs

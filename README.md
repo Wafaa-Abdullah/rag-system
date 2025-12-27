@@ -9,7 +9,7 @@ A Retrieval-Augmented Generation (RAG) system that combines vector embeddings wi
 - Text preprocessing and chunking (300–800 tokens per chunk)  
 - Document embeddings using **SentenceTransformers**  
 - Vector search with **FAISS**  
-- Answer generation via **Ollama** or **FLAN-T5**  
+- Answer generation via **Ollama(qwen2.5:0.5b)** or **FLAN-T5**  
 - FastAPI REST API with `/query` endpoint  
 - Evaluation support for:
   - Context retrieval accuracy  
